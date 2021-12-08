@@ -16,8 +16,8 @@ function LoginPage() {
   const history = useHistory();
   const [emailError, setEmailError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>();
+  const [email, setEmail] = useState<string>("testuser@test.com");
+  const [password, setPassword] = useState<string>("TestUser@123");
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const handleClose = (event: any, reason: any) => {
     if (reason === "clickaway") {
@@ -32,7 +32,7 @@ function LoginPage() {
       return;
     }
     signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(() => {
         // Signed in
         history.push("/");
       })
@@ -58,6 +58,8 @@ function LoginPage() {
         type="email"
         id="login-email"
         label="Email"
+        variant="outlined"
+        value={email}
         onChange={(e) => setEmail(e.target.value)}
         onBlur={() => formValidation.checkEmailValidity(email, setEmailError)}
         helperText={emailError ? "Enter Correct Email" : null}
@@ -67,17 +69,21 @@ function LoginPage() {
       <TextField
         type="password"
         id="login-password"
+        variant="outlined"
         label="Password"
+        value={password}
         onChange={(e: any) => setPassword(e.target.value)}
       />
       <div className="marginY">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => signIn(email, password)}
-        >
-          {SIGNIN_BUTTON}
-        </Button>
+        <div>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => signIn(email, password)}
+          >
+            {SIGNIN_BUTTON}
+          </Button>
+        </div>
         <Typography variant="body2">OR</Typography>
         <Button
           variant="contained"
@@ -91,7 +97,7 @@ function LoginPage() {
   );
   return (
     <>
-      <CenterCard width="20rem" content={loginCardContent()} />{" "}
+      <CenterCard width="20rem" content={loginCardContent()} />
       <Snackbar
         open={openSnackbar}
         autoHideDuration={6000}
