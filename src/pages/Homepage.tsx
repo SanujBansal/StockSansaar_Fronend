@@ -55,12 +55,6 @@ const homepageData = [
     text: "Create you own strategy by observe whats happening in the markets. Top gainers, Top losers, stocks performing technically or fundamentally, all of this data is available for you to filter stocks based upon your needs. If you already have your own strategy, this might be actually the right place to find stocks who follows your strategy.",
     redirectPage: "/screener",
   },
-  {
-    title: "News",
-    image: "/images/stockNews.jpg",
-    text: "Effect of news on stock market is very significant. If you can judge market's emotion by a news, then you often can take right decisions at right time.",
-    redirectPage: "/news",
-  },
 ];
 export default function HomePage() {
   const classes = useStyles();

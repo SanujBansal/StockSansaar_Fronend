@@ -152,12 +152,6 @@ function TopNav({ themeChange, isDarkMode }: any) {
                     onClick={() => history.push("/screener")}
                     {...a11yProps(4)}
                   />
-                  <Tab
-                    label="News"
-                    value="news"
-                    onClick={() => history.push("/news")}
-                    {...a11yProps(2)}
-                  />
                 </Tabs>
               </Grid>
               <Grid item xs={1}>

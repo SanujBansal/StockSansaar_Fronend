@@ -40,7 +40,11 @@ export const AuthProvider = ({ children }: any) => {
   }, []);
 
   if (pending) {
-    return <>Loading...</>;
+    return (
+      <div className="loadingContainer">
+        <div className="loader"></div>
+      </div>
+    );
   }
 
   return (

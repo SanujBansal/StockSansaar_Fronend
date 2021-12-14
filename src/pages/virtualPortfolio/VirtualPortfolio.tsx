@@ -45,19 +45,20 @@ function getNetProfitLoss(params: any) {
     (parseFloat(params.getValue(params.id, "currentPrice")) -
       parseFloat(params.getValue(params.id, "price"))) *
     parseInt(params.getValue(params.id, "quantity"))
-  );
+  ).toFixed(2);
 }
 
 function getPercentageChange(params: any) {
   return (
-    (parseFloat(params.getValue(params.id, "netChange")) /
+    ((parseFloat(params.getValue(params.id, "netChange")) /
       parseFloat(params.getValue(params.id, "price"))) *
-    100
-  );
+      100) /
+    parseFloat(params.getValue(params.id, "quantity"))
+  ).toFixed(2);
 }
 
 const columns = [
-  { field: "symbol", headerName: "Symbol", flex: 0.8 },
+  { field: "symbol", headerName: "Symbol", flex: 0.7 },
   { field: "name", headerName: "Company Name", flex: 1 },
   { field: "price", headerName: "Buy Price", flex: 0.8 },
   { field: "currentPrice", headerName: "Current Price", flex: 0.8 },
@@ -73,7 +74,7 @@ const columns = [
     valueGetter: getPercentageChange,
     flex: 0.9,
   },
-  { field: "quantity", headerName: "Quantity", flex: 0.6 },
+  { field: "quantity", headerName: "Quantity", flex: 0.7 },
   { field: "date", headerName: "Date Added", flex: 0.8 },
 ];
 const useStyles = makeStyles((theme: Theme) =>
@@ -406,12 +407,18 @@ export default function VirtualPortfolio() {
   );
 
   useEffect(() => {
+    setLoading(true);
     virtualPortfolioService(
       "GET",
       VirtualPortfolioEndpointNames.GET_PORTFOLIOS
     ).then(async (res: any) => {
       setPortfoliosWithoutPrice(res.data);
+      setLoading(false);
     });
+    return () => {
+      setLoading(true);
+      setPortfoliosWithoutPrice([]);
+    };
   }, []);
 
   useEffect(() => {
@@ -431,7 +438,6 @@ export default function VirtualPortfolio() {
   }, [portfoliosWithoutPrice]);
 
   if (loading) {
-    console.log(loading);
     return (
       <ViewWrapper>
         <SkeletonTheme baseColor="#202020" highlightColor="#444">
@@ -496,7 +502,7 @@ export default function VirtualPortfolio() {
                 return row.symbol + row.date;
               }}
               onRowClick={(row: any) => {
-                history.push(`stock/${row.row.symbol}`);
+                history.push(`stock/${row.row.symbol.split(".")[0]}`);
               }}
               columns={columns}
               pageSize={10}

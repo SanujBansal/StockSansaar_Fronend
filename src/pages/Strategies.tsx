@@ -36,7 +36,11 @@ export default function Strategies() {
   });
 
   if (!strategies) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loadingContainer">
+        <div className="loader"></div>
+      </div>
+    );
   }
   return (
     <ViewWrapper header={<Typography variant="h3">Strategies</Typography>}>
