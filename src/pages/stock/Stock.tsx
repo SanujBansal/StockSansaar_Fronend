@@ -199,7 +199,7 @@ export default function StockPage() {
             >
               {DETAILED_ANALYTICS_BUTTON}
             </Button>
-            <Button
+            {/* <Button
               variant="contained"
               color="secondary"
               data-kite={process.env.REACT_APP_KITE_API_KEY}
@@ -210,7 +210,7 @@ export default function StockPage() {
               data-order_type="MARKET"
             >
               Buy
-            </Button>
+            </Button> */}
           </div>
         </div>
       }
