@@ -86,6 +86,10 @@ const useStyles = makeStyles((theme: Theme) =>
       width: 400,
       zIndex: 5000,
     },
+    contentSpaceBetween: {
+      display: "flex",
+      justifyContent: "space-between",
+    },
     input: {
       marginLeft: theme.spacing(1),
       flex: 1,
@@ -120,7 +124,7 @@ export default function VirtualPortfolio() {
   const [searchValue, setSearchValue] = React.useState<String>("");
   const [searchResults, setSearchResults] = React.useState<Array<any>>([]);
   const [showSearchResults, setShowSearchResults] = React.useState(false);
-  const [loading, setLoading] = React.useState(true);
+  const [loaded, setLoaded] = React.useState(false);
   const { auth } = useContext(AuthContext);
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -136,6 +140,7 @@ export default function VirtualPortfolio() {
   const [portfoliosWithoutPrice, setPortfoliosWithoutPrice] = React.useState<
     Array<any>
   >([]);
+  const mountRef = React.useRef(false);
   React.useEffect(() => {
     if (searchValue.length > 1) {
       const timeout = setTimeout(() => {
@@ -204,20 +209,24 @@ export default function VirtualPortfolio() {
       VirtualPortfolioEndpointNames.ADD_STOCK,
       {},
       payload
-    ).then((updatedPortfolio) => {
-      setPortfoliosWithoutPrice([
-        ...portfoliosWithoutPrice!.filter(
-          (portfolio) => portfolio._id !== selectedPortfolio._id
-        ),
-        updatedPortfolio.data,
-      ]);
-      setOpen(false);
-      setOpenSnackbar(true);
-      setSnackbarResponse({
-        message: "Stocks Added to the portfolio",
-        status: "success",
+    )
+      .then((updatedPortfolio) => {
+        setPortfoliosWithoutPrice([
+          ...portfoliosWithoutPrice!.filter(
+            (portfolio) => portfolio._id !== selectedPortfolio._id
+          ),
+          updatedPortfolio.data,
+        ]);
+        setOpen(false);
+        setOpenSnackbar(true);
+        setSnackbarResponse({
+          message: "Stocks Added to the portfolio",
+          status: "success",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
       });
-    });
     setSelectedStocks([]);
     setShowSearchResults(false);
   };
@@ -273,7 +282,6 @@ export default function VirtualPortfolio() {
     ).then((res: any) => {
       setPortfolios(
         portfolios?.filter(function (portfolio) {
-          console.log(res.data);
           return portfolio._id !== res.data._id;
         })
       );
@@ -290,7 +298,6 @@ export default function VirtualPortfolio() {
     portfolioToRefresh: any
   ) => {
     event.stopPropagation();
-    console.log(portfolioToRefresh.stocks);
     const stocksWithNewPrices = await addCurrentPriceToStocks(
       portfolioToRefresh.stocks
     );
@@ -379,7 +386,6 @@ export default function VirtualPortfolio() {
       ) : (
         showSearchResults &&
         searchResults.map((result, index) => {
-          console.log(result);
           return (
             <MenuItem
               key={index}
@@ -407,16 +413,14 @@ export default function VirtualPortfolio() {
   );
 
   useEffect(() => {
-    setLoading(true);
     virtualPortfolioService(
       "GET",
       VirtualPortfolioEndpointNames.GET_PORTFOLIOS
     ).then(async (res: any) => {
       setPortfoliosWithoutPrice(res.data);
-      setLoading(false);
+      mountRef.current = true;
     });
     return () => {
-      setLoading(true);
       setPortfoliosWithoutPrice([]);
     };
   }, []);
@@ -430,14 +434,15 @@ export default function VirtualPortfolio() {
           "currentPrice"
         );
       }
-      setLoading(false);
-      setPortfolios(portfoliosCopy);
+      if (mountRef.current) {
+        setLoaded(true);
+        setPortfolios(portfoliosCopy);
+      }
     };
-    setLoading(true);
     updatePortfoliosWithCurrentPrice();
   }, [portfoliosWithoutPrice]);
 
-  if (loading) {
+  if (!loaded) {
     return (
       <ViewWrapper>
         <SkeletonTheme baseColor="#202020" highlightColor="#444">
@@ -454,10 +459,11 @@ export default function VirtualPortfolio() {
   return (
     <ViewWrapper
       header={
-        <div className={clsx("flex")}>
+        <div className={clsx(classes.contentSpaceBetween)}>
           <Typography variant="h3">Virtual Portfolio</Typography>
           <Button
             variant="contained"
+            color="secondary"
             onClick={() => setOpenCreatePortfolio(true)}
           >
             Create Portfolio
@@ -471,26 +477,33 @@ export default function VirtualPortfolio() {
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1a-content"
             id="panel1a-header"
+            classes={{
+              content: classes.contentSpaceBetween,
+            }}
           >
-            <Typography>{portfolio.name}</Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen(true);
-                setSelectedPortfolio(portfolio);
-              }}
-            >
-              Add Stocks
-            </Button>
-            <Delete
-              onClick={() => {
-                setDialogOpen(true);
-                setPortfolioToDelete(portfolio._id);
-              }}
-            />
-            <Refresh onClick={(e) => portfolioRefreshHandler(e, portfolio)} />
+            <div>
+              <Typography>{portfolio.name}</Typography>
+            </div>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(true);
+                  setSelectedPortfolio(portfolio);
+                }}
+              >
+                Add Stocks
+              </Button>
+              <Delete
+                onClick={() => {
+                  setDialogOpen(true);
+                  setPortfolioToDelete(portfolio._id);
+                }}
+              />
+              <Refresh onClick={(e) => portfolioRefreshHandler(e, portfolio)} />
+            </div>
           </AccordionSummary>
           <AccordionDetails>
             <DataGrid

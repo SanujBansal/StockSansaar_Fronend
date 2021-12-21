@@ -58,7 +58,6 @@ function TopNav({ themeChange, isDarkMode }: any) {
   };
 
   useEffect(() => {
-    console.log(location.pathname.split("/")[1]);
     setValue(location.pathname.split("/")[1]);
   }, [location]);
 

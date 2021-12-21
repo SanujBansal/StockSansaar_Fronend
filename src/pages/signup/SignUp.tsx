@@ -53,7 +53,6 @@ function SignUpPage() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleInfoClose = () => {
-    console.log("handle info close");
     setAnchorEl(null);
   };
 

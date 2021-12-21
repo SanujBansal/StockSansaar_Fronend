@@ -35,7 +35,6 @@ const virtualPortfolioService = (
   params: any = {},
   data: any = {}
 ) => {
-  console.log(data);
   const options: AxiosRequestConfig = {
     method,
     url: `${BASE_URL}${getEndpointUrl(endpointName)}`,

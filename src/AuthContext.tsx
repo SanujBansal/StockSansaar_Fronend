@@ -17,7 +17,6 @@ const app = initializeApp({
 const auth = getAuth();
 axios.interceptors.request.use(async (config) => {
   if (config.url?.includes(BASE_URL)) {
-    console.log(config);
     config!.params = {
       ...config.params,
       token: CryptoJS.AES.encrypt(

@@ -28,7 +28,7 @@ import stockSummaryReader from "../../readers/yahooStockSummary";
 import queryYahooFinance, {
   YahooFinanceEndpointNames,
 } from "../../services/yahooFinanceData";
-
+import { useKiteScriptContext } from "../../KiteContext";
 const useStyles = makeStyles({
   header: {
     display: "flex",
@@ -91,6 +91,7 @@ const DETAILED_ANALYTICS_BUTTON = "Detailed Analytics";
 
 const BuyStockDialog = ({ handleDialogClose, dialogOpen, symbol }: any) => {
   const [buyQuantity, setBuyQuantity] = React.useState(0);
+
   return (
     <Dialog
       open={dialogOpen}
@@ -130,6 +131,7 @@ const BuyStockDialog = ({ handleDialogClose, dialogOpen, symbol }: any) => {
 };
 
 export default function StockPage() {
+  const { isReady, kite }: any = useKiteScriptContext();
   const theme = useTheme();
   const history = useHistory();
   const classes = useStyles();
@@ -168,17 +170,25 @@ export default function StockPage() {
   }, [stockName]);
 
   React.useEffect(() => {
-    const script = document.createElement("script");
+    if (!(isReady && kite)) return;
+    // Add a stock to the basket
+    kite.add({
+      exchange: "NSE",
+      tradingsymbol: symbol,
+      quantity: 5,
+      transaction_type: "BUY",
+      order_type: "MARKET",
+    });
 
-    script.src = "https://kite.trade/publisher.js?v=3";
-    script.async = true;
+    // Register an (optional) callback.
+    kite.finished(function (status: string, request_token: string) {
+      alert("Finished. Status is " + status);
+    });
 
-    document.body.appendChild(script);
+    // Render the in-built button inside a given target
+    kite.link("#kite-button");
+  }, [isReady, kite, symbol]);
 
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue);
   };
@@ -199,18 +209,9 @@ export default function StockPage() {
             >
               {DETAILED_ANALYTICS_BUTTON}
             </Button>
-            {/* <Button
-              variant="contained"
-              color="secondary"
-              data-kite={process.env.REACT_APP_KITE_API_KEY}
-              data-exchange="NSE"
-              data-tradingsymbol={symbol}
-              data-transaction_type="BUY"
-              data-quantity="1"
-              data-order_type="MARKET"
-            >
+            <Button variant="contained" color="secondary" id="kite-button">
               Buy
-            </Button> */}
+            </Button>
           </div>
         </div>
       }
